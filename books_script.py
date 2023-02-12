@@ -53,10 +53,17 @@ for book_id in range(1, 11):
     """book_image_link = get_image_link(book_site_page_url, book_sitepage_response)"""
 
     soup = BeautifulSoup(book_sitepage_response.text, 'lxml')
-    try:
+    """try:
         comments = soup.find_all('div', class_='texts')
         book_comments = [comment.find('span').text for comment in comments]
         print(get_book_name(book_sitepage_response), *book_comments, sep = '\n')
+    except AttributeError:
+        continue
+    """
+    try:
+        genres = soup.find('span', class_='d_book').find_all('a')
+        book_genre = [genre.text for genre in genres]
+        print(get_book_name(book_sitepage_response), book_genre, sep='\n')
     except AttributeError:
         continue
 
