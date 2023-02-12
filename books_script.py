@@ -106,6 +106,8 @@ def main():
         soup = BeautifulSoup(response.text, 'lxml')
         try:
             parse_book_page(response, soup, book_site_page_url)
+            download_txt(response, soup, book_download_url)
+            download_image(response, soup, book_site_page_url, folder='images/')
         except requests.exceptions.HTTPError:
             pass
 
