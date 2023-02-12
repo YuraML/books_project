@@ -42,7 +42,7 @@ def download_txt(filename, folder='books/'):
     return book_path
 
 
-for book_id in range(5, 10):
+for book_id in range(1, 11):
     book_download_url = f'https://tululu.org/txt.php?id={book_id}'
     book_site_page_url = f'https://tululu.org/b{book_id}/'
     response = requests.get(book_download_url)
@@ -50,5 +50,13 @@ for book_id in range(5, 10):
     book_sitepage_response = requests.get(book_site_page_url)
     book_sitepage_response.raise_for_status()
     filename = get_book_name(book_sitepage_response)
-    book_image_link = get_image_link(book_site_page_url, book_sitepage_response)
-    download_image(book_image_link, folder='images/')
+    """book_image_link = get_image_link(book_site_page_url, book_sitepage_response)"""
+
+    soup = BeautifulSoup(book_sitepage_response.text, 'lxml')
+    try:
+        comments = soup.find_all('div', class_='texts')
+        book_comments = [comment.find('span').text for comment in comments]
+        print(get_book_name(book_sitepage_response), *book_comments, sep = '\n')
+    except AttributeError:
+        continue
+
