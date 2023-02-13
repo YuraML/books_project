@@ -45,6 +45,7 @@ def download_image(image_filename, book_image_link, folder='images/'):
     image_path = os.path.join(folder, image_filename)
     response = requests.get(book_image_link)
     response.raise_for_status()
+    check_for_redirect(response)
     with open(image_path, 'wb') as file:
         file.write(response.content)
 
@@ -77,13 +78,13 @@ def get_genres(soup):
     return book_genres
 
 
-def parse_book_page(book_title, soup, book_site_page_url, book_image_link):
+def parse_book_page(book_title, soup, book_path, image_filename, book_image_link):
     book_page = {
         'book_name': book_title[0].strip(),
         'author': book_title[1].strip(),
-        'book_path': get_book_path(book_title, folder='books/'),
-        'book_image_link': get_image_link(soup, book_site_page_url),
-        'book_image_id': get_image_id(book_image_link),
+        'book_path': book_path,
+        'book_image_link': book_image_link,
+        'book_image_id': image_filename,
         'comments': get_comments(soup),
         'genres': get_genres(soup)
     }
@@ -106,14 +107,14 @@ def main():
         soup = BeautifulSoup(response.text, 'lxml')
         book_title = get_book_title(soup)
         book_path = get_book_path(book_title, folder='books/')
-        book_image_link = get_image_link(soup, book_site_page_url)
-        image_filename = get_image_id(book_image_link)
         try:
             check_for_redirect(response)
-            parse_book_page(book_title, soup, book_site_page_url, book_image_link)
+            book_image_link = get_image_link(soup, book_site_page_url)
+            image_filename = get_image_id(book_image_link)
+            parse_book_page(book_title, soup, book_path, image_filename, book_image_link)
             download_txt(book_path, book_download_url)
             download_image(image_filename, book_image_link, folder='images/')
-        except requests.exceptions.HTTPError:
+        except (requests.exceptions.HTTPError, AttributeError):
             pass
 
 
