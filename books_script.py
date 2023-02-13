@@ -1,6 +1,7 @@
 import requests
 import os
 import argparse
+import logging
 from pathvalidate import sanitize_filename
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, unquote, urlparse
@@ -92,7 +93,9 @@ def parse_book_page(response, soup, book_site_page_url):
         'comments': get_comments(soup),
         'genres': get_genres(soup)
     }
-    print(f'Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}', sep='\n', end='\n')
+    logging_info = f'Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}'
+    logging.basicConfig(level=logging.INFO)
+    return logging.info(logging_info)
 
 
 def main():
