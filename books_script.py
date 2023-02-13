@@ -108,6 +108,7 @@ def main():
         download_response.raise_for_status()
         soup = BeautifulSoup(response.text, 'lxml')
         try:
+            check_for_redirect(response)
             parse_book_page(response, soup, book_site_page_url)
             download_txt(response, soup, book_download_url)
             download_image(response, soup, book_site_page_url, folder='images/')
