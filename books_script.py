@@ -103,6 +103,9 @@ def main():
         book_site_page_url = f'https://tululu.org/b{book_id}/'
         response = requests.get(book_site_page_url)
         response.raise_for_status()
+        params = {'id': book_id}
+        download_response = requests.get(book_download_url, params = params)
+        download_response.raise_for_status()
         soup = BeautifulSoup(response.text, 'lxml')
         try:
             parse_book_page(response, soup, book_site_page_url)
