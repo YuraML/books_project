@@ -34,16 +34,13 @@ def get_image_link(soup, book_site_page_url):
     return book_image_link
 
 
-def get_image_id(soup, book_site_page_url):
-    book_image_link = get_image_link(soup, book_site_page_url)
+def get_image_id(book_image_link):
     image_id = unquote(urlparse(book_image_link).path.split('/')[-1])
     image_id = sanitize_filename(image_id)
     return image_id
 
 
-def download_image(soup, book_site_page_url, folder='images/'):
-    book_image_link = get_image_link(soup, book_site_page_url)
-    image_filename = get_image_id(soup, book_site_page_url)
+def download_image(image_filename, book_image_link, folder='images/'):
     Path("images").mkdir(parents=True, exist_ok=True)
     image_path = os.path.join(folder, image_filename)
     response = requests.get(book_image_link)
@@ -80,13 +77,13 @@ def get_genres(soup):
     return book_genres
 
 
-def parse_book_page(book_title, soup, book_site_page_url):
+def parse_book_page(book_title, soup, book_site_page_url, book_image_link):
     book_page = {
         'book_name': book_title[0].strip(),
         'author': book_title[1].strip(),
         'book_path': get_book_path(book_title, folder='books/'),
         'book_image_link': get_image_link(soup, book_site_page_url),
-        'book_image_id': get_image_id(soup, book_site_page_url),
+        'book_image_id': get_image_id(book_image_link),
         'comments': get_comments(soup),
         'genres': get_genres(soup)
     }
@@ -109,11 +106,13 @@ def main():
         soup = BeautifulSoup(response.text, 'lxml')
         book_title = get_book_title(soup)
         book_path = get_book_path(book_title, folder='books/')
+        book_image_link = get_image_link(soup, book_site_page_url)
+        image_filename = get_image_id(book_image_link)
         try:
             check_for_redirect(response)
-            parse_book_page(book_title, soup, book_site_page_url)
+            parse_book_page(book_title, soup, book_site_page_url, book_image_link)
             download_txt(book_path, book_download_url)
-            download_image(soup, book_site_page_url, folder='images/')
+            download_image(image_filename, book_image_link, folder='images/')
         except requests.exceptions.HTTPError:
             pass
 
