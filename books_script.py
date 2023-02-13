@@ -6,6 +6,7 @@ from pathvalidate import sanitize_filename
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, unquote, urlparse
 from pathlib import Path
+from time import sleep
 
 
 def create_parser():
@@ -96,6 +97,7 @@ def parse_book_page(book_title, soup, book_path, image_filename, book_image_link
 def main():
     parser = create_parser()
     args = parser.parse_args()
+    reconnect_time = 60
     for book_id in range(args.start_id, args.end_id + 1):
         book_download_url = f'https://tululu.org/txt.php?id={book_id}'
         book_site_page_url = f'https://tululu.org/b{book_id}/'
@@ -115,7 +117,12 @@ def main():
             download_txt(book_path, book_download_url)
             download_image(image_filename, book_image_link, folder='images/')
         except (requests.exceptions.HTTPError, AttributeError):
+            logging.warning(f'Книга с id {book_id} не найдена.')
             pass
+        except requests.exceptions.ConnectionError:
+            logging.warning('Соединение прервано, повторное соединение через 60 секунд.')
+            sleep(reconnect_time)
+            continue
 
 
 if __name__ == '__main__':
