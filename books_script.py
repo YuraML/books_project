@@ -35,10 +35,10 @@ def get_image_link(soup, book_site_page_url):
     return book_image_link
 
 
-def get_image_id(book_image_link):
-    image_id = unquote(urlparse(book_image_link).path.split('/')[-1])
-    image_id = sanitize_filename(image_id)
-    return image_id
+def get_image_filename(book_image_link):
+    image_filename = unquote(urlparse(book_image_link).path.split('/')[-1])
+    image_filename = sanitize_filename(image_filename)
+    return image_filename
 
 
 def download_image(image_filename, book_image_link, folder='images/'):
@@ -85,7 +85,7 @@ def parse_book_page(book_title, soup, book_path, image_filename, book_image_link
         'author': book_title[1].strip(),
         'book_path': book_path,
         'book_image_link': book_image_link,
-        'book_image_id': image_filename,
+        'book_image_filename': image_filename,
         'comments': get_comments(soup),
         'genres': get_genres(soup)
     }
@@ -99,20 +99,21 @@ def main():
     args = parser.parse_args()
     reconnect_time = 60
     for book_id in range(args.start_id, args.end_id + 1):
-        book_download_url = f'https://tululu.org/txt.php?id={book_id}'
+        book_download_url = f'https://tululu.org/'
         book_site_page_url = f'https://tululu.org/b{book_id}/'
-        response = requests.get(book_site_page_url)
-        response.raise_for_status()
-        params = {'id': book_id}
-        download_response = requests.get(book_download_url, params=params)
-        download_response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'lxml')
-        book_title = get_book_title(soup)
-        book_path = get_book_path(book_title, folder='books/')
         try:
+            response = requests.get(book_site_page_url)
+            response.raise_for_status()
+            params = {'id': f'txt.php?id={book_id}'}
+            download_response = requests.get(book_download_url, params=params)
+            download_response.raise_for_status()
             check_for_redirect(response)
+            check_for_redirect(download_response)
+            soup = BeautifulSoup(response.text, 'lxml')  # 3 below check later
+            book_title = get_book_title(soup)
+            book_path = get_book_path(book_title, folder='books/')
             book_image_link = get_image_link(soup, book_site_page_url)
-            image_filename = get_image_id(book_image_link)
+            image_filename = get_image_filename(book_image_link)
             parse_book_page(book_title, soup, book_path, image_filename, book_image_link)
             download_txt(book_path, book_download_url)
             download_image(image_filename, book_image_link, folder='images/')
