@@ -89,12 +89,12 @@ def parse_book_page(book_title, soup, book_path, image_filename, book_image_link
         'comments': get_comments(soup),
         'genres': get_genres(soup)
     }
-    logging_info = f'Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}'
-    logging.basicConfig(level=logging.INFO)
-    return logging.info(logging_info)
+    book_full_details = f'Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}'
+    return book_page
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     parser = create_parser()
     args = parser.parse_args()
     reconnect_time = 60
@@ -109,7 +109,7 @@ def main():
             download_response.raise_for_status()
             check_for_redirect(response)
             check_for_redirect(download_response)
-            soup = BeautifulSoup(response.text, 'lxml')  # 3 below check later
+            soup = BeautifulSoup(response.text, 'lxml')  
             book_title = get_book_title(soup)
             book_path = get_book_path(book_title, folder='books/')
             book_image_link = get_image_link(soup, book_site_page_url)
@@ -119,7 +119,6 @@ def main():
             download_image(image_filename, book_image_link, folder='images/')
         except (requests.exceptions.HTTPError, AttributeError):
             logging.warning(f'Книга с id {book_id} не найдена.')
-            pass
         except requests.exceptions.ConnectionError:
             logging.warning('Соединение прервано, повторное соединение через 60 секунд.')
             sleep(reconnect_time)
