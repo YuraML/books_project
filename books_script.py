@@ -41,8 +41,10 @@ def get_image_filename(book_image_link):
     return image_filename
 
 
-def download_image(image_filename, book_image_link, folder='images/'):
+def download_image(book_page, folder='images/'):
     Path("images").mkdir(parents=True, exist_ok=True)
+    image_filename = book_page['book_image_filename']
+    book_image_link = book_page['book_image_link']
     image_path = os.path.join(folder, image_filename)
     response = requests.get(book_image_link)
     response.raise_for_status()
@@ -58,8 +60,9 @@ def get_book_path(book_title, folder='books/'):
     return book_path
 
 
-def download_txt(book_path, book_download_url):
+def download_txt(book_page, book_download_url):
     Path("books").mkdir(parents=True, exist_ok=True)
+    book_path = book_page['book_path']
     response = requests.get(book_download_url)
     response.raise_for_status()
     check_for_redirect(response)
@@ -79,7 +82,12 @@ def get_genres(soup):
     return book_genres
 
 
-def parse_book_page(book_title, soup, book_path, image_filename, book_image_link):
+def parse_book_page(response, book_site_page_url):
+    soup = BeautifulSoup(response.text, 'lxml')
+    book_title = get_book_title(soup)
+    book_path = get_book_path(book_title, folder='books/')
+    book_image_link = get_image_link(soup, book_site_page_url)
+    image_filename = get_image_filename(book_image_link)
     book_page = {
         'book_name': book_title[0].strip(),
         'author': book_title[1].strip(),
@@ -89,7 +97,6 @@ def parse_book_page(book_title, soup, book_path, image_filename, book_image_link
         'comments': get_comments(soup),
         'genres': get_genres(soup)
     }
-    book_full_details = f'Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}'
     return book_page
 
 
@@ -104,19 +111,15 @@ def main():
         try:
             response = requests.get(book_site_page_url)
             response.raise_for_status()
-            params = {'id': f'txt.php?id={book_id}'}
+            check_for_redirect(response)
+            params = {'id': f'txt.php{book_id}'}
             download_response = requests.get(book_download_url, params=params)
             download_response.raise_for_status()
-            check_for_redirect(response)
             check_for_redirect(download_response)
-            soup = BeautifulSoup(response.text, 'lxml')  
-            book_title = get_book_title(soup)
-            book_path = get_book_path(book_title, folder='books/')
-            book_image_link = get_image_link(soup, book_site_page_url)
-            image_filename = get_image_filename(book_image_link)
-            parse_book_page(book_title, soup, book_path, image_filename, book_image_link)
-            download_txt(book_path, book_download_url)
-            download_image(image_filename, book_image_link, folder='images/')
+            book_page = parse_book_page(response, book_site_page_url)
+            download_txt(book_page, book_download_url)
+            download_image(book_page, folder='images/')
+            print(f'Книга с id {book_id} скачана. Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}')
         except (requests.exceptions.HTTPError, AttributeError):
             logging.warning(f'Книга с id {book_id} не найдена.')
         except requests.exceptions.ConnectionError:
