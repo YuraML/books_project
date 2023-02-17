@@ -41,7 +41,7 @@ def get_image_filename(book_image_link):
     return image_filename
 
 
-def download_image(book_page, folder='images/'):
+def download_image(book_page, folder):
     Path("images").mkdir(parents=True, exist_ok=True)
     image_filename = book_page['book_image_filename']
     book_image_link = book_page['book_image_link']
@@ -53,17 +53,17 @@ def download_image(book_page, folder='images/'):
         file.write(response.content)
 
 
-def get_book_path(book_title, folder='books/'):
+def get_book_path(book_title, folder):
     filename = sanitize_filename(book_title[0])
     book_filename = f'{filename.strip()}.txt'
     book_path = os.path.join(folder, book_filename)
     return book_path
 
 
-def download_txt(book_page, book_download_url):
+def download_txt(book_page, book_download_url, params):
     Path("books").mkdir(parents=True, exist_ok=True)
     book_path = book_page['book_path']
-    response = requests.get(book_download_url)
+    response = requests.get(book_download_url, params=params)
     response.raise_for_status()
     check_for_redirect(response)
     with open(book_path, 'wb') as file:
@@ -88,9 +88,10 @@ def parse_book_page(response, book_site_page_url):
     book_path = get_book_path(book_title, folder='books/')
     book_image_link = get_image_link(soup, book_site_page_url)
     image_filename = get_image_filename(book_image_link)
+    book_name, book_author = book_title
     book_page = {
-        'book_name': book_title[0].strip(),
-        'author': book_title[1].strip(),
+        'book_name': book_name.strip(),
+        'author': book_author.strip(),
         'book_path': book_path,
         'book_image_link': book_image_link,
         'book_image_filename': image_filename,
@@ -108,16 +109,13 @@ def main():
     for book_id in range(args.start_id, args.end_id + 1):
         book_download_url = f'https://tululu.org/'
         book_site_page_url = f'https://tululu.org/b{book_id}/'
+        params = {'id': f'txt.php{book_id}'}
         try:
             response = requests.get(book_site_page_url)
             response.raise_for_status()
             check_for_redirect(response)
-            params = {'id': f'txt.php{book_id}'}
-            download_response = requests.get(book_download_url, params=params)
-            download_response.raise_for_status()
-            check_for_redirect(download_response)
             book_page = parse_book_page(response, book_site_page_url)
-            download_txt(book_page, book_download_url)
+            download_txt(book_page, book_download_url, params)
             download_image(book_page, folder='images/')
             print(f'Книга с id {book_id} скачана. Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}')
         except (requests.exceptions.HTTPError, AttributeError):
