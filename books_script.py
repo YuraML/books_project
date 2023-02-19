@@ -41,11 +41,9 @@ def get_image_filename(book_image_link):
     return image_filename
 
 
-def download_image(book_page):
+def download_image(image_filename, book_image_link):
     folder = 'images/'
     Path("images").mkdir(parents=True, exist_ok=True)
-    image_filename = book_page['book_image_filename']
-    book_image_link = book_page['book_image_link']
     image_path = os.path.join(folder, image_filename)
     response = requests.get(book_image_link)
     response.raise_for_status()
@@ -54,18 +52,17 @@ def download_image(book_page):
         file.write(response.content)
 
 
-def get_book_path(book_title):
+def get_book_path(book_name):
     folder = 'books/'
-    filename = sanitize_filename(book_title[0])
+    filename = sanitize_filename(book_name)
     book_filename = f'{filename.strip()}.txt'
     book_path = os.path.join(folder, book_filename)
     return book_path
 
 
-def download_txt(book_page, book_download_url, book_id):
+def download_txt(book_path, book_download_url, book_id):
     params = {'id': f'{book_id}'}
     Path("books").mkdir(parents=True, exist_ok=True)
-    book_path = book_page['book_path']
     response = requests.get(book_download_url, params=params)
     response.raise_for_status()
     check_for_redirect(response)
@@ -88,10 +85,10 @@ def get_genres(soup):
 def parse_book_page(response, book_site_page_url):
     soup = BeautifulSoup(response.text, 'lxml')
     book_title = get_book_title(soup)
-    book_path = get_book_path(book_title)
     book_image_link = get_image_link(soup, book_site_page_url)
     image_filename = get_image_filename(book_image_link)
     book_name, book_author = book_title
+    book_path = get_book_path(book_name)
     book_page = {
         'book_name': book_name.strip(),
         'author': book_author.strip(),
@@ -117,8 +114,10 @@ def main():
             response.raise_for_status()
             check_for_redirect(response)
             book_page = parse_book_page(response, book_site_page_url)
-            download_txt(book_page, book_download_url, book_id)
-            download_image(book_page)
+            book_path, image_filename, book_image_link = book_page['book_path'], \
+                book_page['book_image_filename'], book_page['book_image_link']
+            download_txt(book_path, book_download_url, book_id)
+            download_image(image_filename, book_image_link)
             print(f'Книга с id {book_id} скачана. Название: {book_page["book_name"]}', f'Автор: {book_page["author"]}')
         except (requests.exceptions.HTTPError, AttributeError):
             logging.warning(f'Книга с id {book_id} не найдена.')
