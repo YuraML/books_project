@@ -16,10 +16,11 @@ def main():
         books_page_url = f'https://tululu.org/l55/{books_page}/'
         books_page_response = requests.get(books_page_url)
         soup = BeautifulSoup(books_page_response.text, 'lxml')
-        books_list = soup.find_all('table', class_='d_book')
+        books_page_selector = 'table.d_book'
+        books_list = soup.select(books_page_selector)
         for book in books_list:
             try:
-                book_full_id = book.find('a')['href']
+                book_full_id = book.select_one('a')['href']
                 book_link = urljoin(book_url, book_full_id)
                 book_id = book_full_id.replace('/', '')[1:]
                 book_site_page_url = f'https://tululu.org/b{book_id}/'
