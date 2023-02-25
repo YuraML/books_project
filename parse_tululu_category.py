@@ -5,12 +5,23 @@ from urllib.parse import urljoin
 from books_script import download_txt, download_image, parse_book_page, check_for_redirect
 import json
 from time import sleep
+import argparse
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(
+        description='Скрипт позволяет скачивать книги с раздела научной фантастики с сайта https://tululu.org/')
+    parser.add_argument('--start_page', help='Укажите с какой страницы раздела начать скачивание', type=int, default=1)
+    parser.add_argument('--end_page', help='Укажите до какой страницы продолжать скачивание', type=int, default=702)
+    return parser
 
 
 def main():
     books_description = []
     reconnect_time = 60
-    for books_page in range(1, 5):
+    parser = create_parser()
+    args = parser.parse_args()
+    for books_page in range(args.start_page, args.end_page):
         book_url = 'https://tululu.org/b'
         book_download_url = 'https://tululu.org/txt.php'
         books_page_url = f'https://tululu.org/l55/{books_page}/'
@@ -33,8 +44,7 @@ def main():
                 download_txt(book_path, book_download_url, book_id)
                 download_image(image_filename, book_image_link)
                 books_description.append(book_page)
-                print(f'Книга с id {book_id} скачана. Название: {book_page["book_name"]}',
-                      f'Автор: {book_page["author"]}')
+                print(book_link)
             except (requests.exceptions.HTTPError, AttributeError):
                 logging.warning(f'Книга с id {book_id} не найдена.')
             except requests.exceptions.ConnectionError:
