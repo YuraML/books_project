@@ -31,6 +31,7 @@ def main():
     os.chdir(dest_folder) if dest_folder else None
     json_path = args.json_path
     os.makedirs(json_path, exist_ok=True)
+
     for books_page in range(args.start_page, args.end_page):
         book_url = 'https://tululu.org/b'
         book_download_url = 'https://tululu.org/txt.php'
@@ -38,8 +39,9 @@ def main():
         books_page_response = requests.get(books_page_url)
         soup = BeautifulSoup(books_page_response.text, 'lxml')
         books_page_selector = 'table.d_book'
-        books_list = soup.select(books_page_selector)
-        for book in books_list:
+        books_on_page = soup.select(books_page_selector)
+
+        for book in books_on_page:
             try:
                 book_full_id = book.select_one('a')['href']
                 book_link = urljoin(book_url, book_full_id)
@@ -50,11 +52,14 @@ def main():
                 check_for_redirect(response)
                 book_page = parse_book_page(response, book_link)
                 book_path, image_filename, book_image_link = book_page["book_path"], book_page['book_image_filename'], \
-                book_page['book_image_link']
-                download_txt(book_path, book_download_url, book_id) if not args.skip_txt else None
-                download_image(image_filename, book_image_link) if not args.skip_imgs else None
+                    book_page['book_image_link']
+
+                if not args.skip_txt:
+                    download_txt(book_path, book_download_url, book_id)
+                elif not args.skip_imgs:
+                    download_image(image_filename, book_image_link)
                 books_description.append(book_page)
-                print(book_link)
+
             except (requests.exceptions.HTTPError, AttributeError):
                 logging.warning(f'Книга с id {book_id} не найдена.')
             except requests.exceptions.ConnectionError:
