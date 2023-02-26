@@ -47,6 +47,7 @@ def main():
                 book_link = urljoin(book_url, book_full_id)
                 book_id = book_full_id.replace('/', '')[1:]
                 book_site_page_url = f'https://tululu.org/b{book_id}/'
+                
                 response = requests.get(book_site_page_url)
                 response.raise_for_status()
                 check_for_redirect(response)
@@ -66,6 +67,7 @@ def main():
                 logging.warning('Соединение прервано, повторное соединение через 60 секунд.')
                 sleep(reconnect_time)
                 continue
+                
     with open(f'{json_path}/books_json', "w", encoding='utf8') as json_file:
         json.dump(books_description, json_file, ensure_ascii=False, indent=4)
 
