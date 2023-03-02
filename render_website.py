@@ -1,7 +1,8 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import json
+from urllib.parse import urlencode
 from livereload import Server
+from more_itertools import chunked
 
 
 def on_reload():
@@ -16,13 +17,14 @@ def on_reload():
     books = json.loads(books_json)
     books_page = []
     for book in books:
-        image = book['book_image_link']
+        image = urlencode(book['book_image_link'])
         author = book['author']
         title = book['book_name']
         books_info = {'image': image, 'author': author, 'title': title}
         books_page.append(books_info)
 
-    rendered_page = template.render(books=books_page)
+    chunked_books = list(chunked(books_page, 2))
+    rendered_page = template.render(books=chunked_books)
 
     with open('index.html', 'w', encoding="utf8") as file:
         file.write(rendered_page)
@@ -31,5 +33,4 @@ def on_reload():
 on_reload()
 server = Server()
 server.watch('template.html', on_reload)
-
 server.serve(root='.')
