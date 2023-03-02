@@ -1,6 +1,5 @@
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import json
-from urllib.parse import urlencode
 from livereload import Server
 from more_itertools import chunked
 
@@ -17,10 +16,11 @@ def on_reload():
     books = json.loads(books_json)
     books_page = []
     for book in books:
-        image = urlencode(book['book_image_link'])
+        image = book['book_image_link']
         author = book['author']
         title = book['book_name']
-        books_info = {'image': image, 'author': author, 'title': title}
+        text = book['book_path']
+        books_info = {'image': image, 'author': author, 'title': title, 'text': text}
         books_page.append(books_info)
 
     chunked_books = list(chunked(books_page, 2))
