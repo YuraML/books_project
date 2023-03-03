@@ -23,7 +23,8 @@ def on_reload():
         author = book['author']
         title = book['book_name']
         text = book['book_path']
-        books_info = {'image': image, 'author': author, 'title': title, 'text': text}
+        genres = book['genres']
+        books_info = {'image': image, 'author': author, 'title': title, 'text': text, 'genres': genres}
         books_page.append(books_info)
 
     chunked_books = list(chunked(books_page, 2))
