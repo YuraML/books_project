@@ -19,21 +19,23 @@ def on_reload():
 
     books_page = []
     for book in books:
-        image = book['book_image_link']
-        author = book['author']
-        title = book['book_name']
-        text = book['book_path']
-        genres = book['genres']
-        books_info = {'image': image, 'author': author, 'title': title, 'text': text, 'genres': genres}
-        books_page.append(books_info)
+        book_details = {'image': book['book_image_filename'],
+                        'author': book['author'],
+                        'title': book['book_name'],
+                        'text': book['book_path'],
+                        'genres': book['genres']
+                        }
+        books_page.append(book_details)
 
-    chunked_books = list(chunked(books_page, 2))
-    chunked_pages = list(chunked(chunked_books, 5))
+    books_columns = 2
+    chunked_books = list(chunked(books_page, books_columns))
+    books_per_column = 5
+    chunked_pages = list(chunked(chunked_books, books_per_column))
     pages_amount = len(chunked_pages)
-    for page_number, chunk in enumerate(chunked_pages, 1):
-        filename = Path('pages/', f'index{page_number}.html')
 
-        rendered_page = template.render(books=chunk,
+    for page_number, books in enumerate(chunked_pages, 1):
+        filename = Path('pages/', f'index{page_number}.html')
+        rendered_page = template.render(books=books,
                                         page_number=page_number,
                                         pages_amount=pages_amount
                                         )
@@ -41,7 +43,12 @@ def on_reload():
             file.write(rendered_page)
 
 
-on_reload()
-server = Server()
-server.watch('template.html', on_reload)
-server.serve(root='.')
+def main():
+    on_reload()
+    server = Server()
+    server.watch('template.html', on_reload)
+    server.serve(root='.')
+
+
+if __name__ == "__main__":
+    main()
