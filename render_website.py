@@ -28,10 +28,14 @@ def on_reload():
 
     chunked_books = list(chunked(books_page, 2))
     chunked_pages = list(chunked(chunked_books, 5))
-    for page, chunk in enumerate(chunked_pages, 1):
-        filename = Path('pages/', f'index{page}.html')
+    pages_amount = len(chunked_pages)
+    for page_number, chunk in enumerate(chunked_pages, 1):
+        filename = Path('pages/', f'index{page_number}.html')
 
-        rendered_page = template.render(books=chunk)
+        rendered_page = template.render(books=chunk,
+                                        page_number=page_number,
+                                        pages_amount=pages_amount
+                                        )
         with open(filename, 'w', encoding="utf8") as file:
             file.write(rendered_page)
 
