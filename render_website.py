@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 
@@ -14,12 +15,18 @@ def on_reload():
     )
     template = env.get_template('template.html')
     os.makedirs('pages/', exist_ok=True)
-    with open("json/books_json", "r", encoding="utf8") as my_file:
-        books_json = my_file.read()
-    books = json.loads(books_json)
+
+    parser = argparse.ArgumentParser(
+        description='Скрипт позволяет запустить сайт с библиотекой книг научной фантастики.')
+    parser.add_argument('--json_path', help='Укажите путь к файлу json.', default="json/")
+    args = parser.parse_args()
+    filename = "books_json"
+    json_path = os.path.join(args.json_path, filename)
+    with open(json_path, "r", encoding="utf8") as file:
+        books_description = json.load(file)
 
     books_page = []
-    for book in books:
+    for book in books_description:
         book_details = {'image': book['book_image_filename'],
                         'author': book['author'],
                         'title': book['book_name'],
