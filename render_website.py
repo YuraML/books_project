@@ -25,18 +25,8 @@ def on_reload():
     with open(json_path, "r", encoding="utf8") as file:
         books_description = json.load(file)
 
-    books_page = []
-    for book in books_description:
-        book_details = {'image': book['book_image_filename'],
-                        'author': book['author'],
-                        'title': book['book_name'],
-                        'text': book['book_path'],
-                        'genres': book['genres']
-                        }
-        books_page.append(book_details)
-
     books_columns = 2
-    chunked_books = list(chunked(books_page, books_columns))
+    chunked_books = list(chunked(books_description, books_columns))
     books_per_column = 5
     chunked_pages = list(chunked(chunked_books, books_per_column))
     pages_amount = len(chunked_pages)
