@@ -44,7 +44,7 @@
         <div class="row">
           {% for book_card in chunk %}
             <div class="col-md-2 m-2">
-              <img src="../static/{{book_card.book_image_filename}}" class="card-img" alt="image">
+              <img src="../static/{{book_card.book_image_filename | urlencode}}" class="card-img" alt="image">
             </div>
               <div class="col">
                 <div class="card-body">
