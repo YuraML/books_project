@@ -24,19 +24,18 @@ def on_reload():
     with open(json_path, "r", encoding="utf8") as file:
         book_cards = json.load(file)
 
-    book_card_columns = 2
-    chunked_book_cards = list(chunked(book_cards, book_card_columns))
+    chunked_book_cards = list(chunked(book_cards, 2))
     book_cards_per_column = 5
     chunked_pages = list(chunked(chunked_book_cards, book_cards_per_column))
     pages_amount = len(chunked_pages)
 
     for page_number, book_cards in enumerate(chunked_pages, 1):
-        filename_path = Path('pages/', f'index{page_number}.html')
+        page_path = Path('pages/', f'index{page_number}.html')
         rendered_page = template.render(book_cards=book_cards,
                                         page_number=page_number,
                                         pages_amount=pages_amount
                                         )
-        with open(filename_path, 'w', encoding="utf8") as file:
+        with open(page_path, 'w', encoding="utf8") as file:
             file.write(rendered_page)
 
 
