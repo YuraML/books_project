@@ -22,10 +22,10 @@ def on_reload():
     args = parser.parse_args()
     json_path = args.json_path
     with open(json_path, "r", encoding="utf8") as file:
-        books_description = json.load(file)
+        book_cards = json.load(file)
 
     book_card_columns = 2
-    chunked_book_cards = list(chunked(books_description, book_card_columns))
+    chunked_book_cards = list(chunked(book_cards, book_card_columns))
     book_cards_per_column = 5
     chunked_pages = list(chunked(chunked_book_cards, book_cards_per_column))
     pages_amount = len(chunked_pages)
