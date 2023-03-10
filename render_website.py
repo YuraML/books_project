@@ -18,10 +18,9 @@ def on_reload():
 
     parser = argparse.ArgumentParser(
         description='Скрипт позволяет запустить сайт с библиотекой книг научной фантастики.')
-    parser.add_argument('--json_path', help='Укажите путь к файлу json.', default="json/")
+    parser.add_argument('--json_path', help='Укажите путь к файлу json.', default="books.json")
     args = parser.parse_args()
-    filename = "books_json"
-    json_path = os.path.join(args.json_path, filename)
+    json_path = args.json_path
     with open(json_path, "r", encoding="utf8") as file:
         books_description = json.load(file)
 
