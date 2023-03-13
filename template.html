@@ -39,27 +39,41 @@
     </div>
 
 
-    <div class="container">
-      {% for chunk in book_cards %}
-        <div class="row">
-          {% for book_card in chunk %}
+    {% for left_col, right_col in chunked(book_cards, 2) %}
+      <div class="container">
+          <div class="row">
             <div class="col-md-2 m-2">
-              <img src="../static/{{book_card.book_image_filename | urlencode}}" class="card-img" alt="image">
+              <img src="../static/{{left_col.book_image_filename | urlencode}}" class="card-img" alt="image">
             </div>
               <div class="col">
                 <div class="card-body">
-                  <h5 class="card-title">{{book_card.book_name}}</h5>
-                  <p class="card-text">{{book_card.author}}</p>
-                    {% for genre in book_card.genres %}
+                  <h5 class="card-title">{{left_col.book_name}}</h5>
+                  <p class="card-text">{{left_col.author}}</p>
+                    {% for genre in left_col.genres %}
                       <h6><span class="badge badge-light">{{genre}}</span></h6>
                     {% endfor %}
-                  <a href="../{{book_card.book_path | urlencode}}" target="_blank">Читать</a>
+                  <a href="../{{left_col.book_path | urlencode}}" target="_blank">Читать</a>
                 </div>
               </div>
-          {% endfor %}
-        </div>
-      {% endfor %}
-    </div>
+
+            <div class="col-md-2 m-2">
+              <img src="../static/{{right_col.book_image_filename | urlencode}}" class="card-img" alt="image">
+            </div>
+              <div class="col">
+                <div class="card-body">
+                  <h5 class="card-title">{{right_col.book_name}}</h5>
+                  <p class="card-text">{{right_col.author}}</p>
+                    {% for genre in right_col.genres %}
+                      <h6><span class="badge badge-light">{{genre}}</span></h6>
+                    {% endfor %}
+                  <a href="../{{right_col.book_path | urlencode}}" target="_blank">Читать</a>
+                </div>
+              </div>
+          </div>
+      </div>
+    {% endfor %}
+
+
 
     <script src="../static/jquery-3.5.1.slim.min.js"></script>
     <script src="../static/bootstrap.bundle.min.js"></script>
