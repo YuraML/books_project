@@ -38,31 +38,31 @@
       </nav>
     </div>
 
-  <div class="container">
-    <div class="row row-cols-2">
-      {% for book_card in book_cards %}
-        <div class="col">
-          <div class="card mb-3" style="max-width: 540px;">
-            <div class="row no-gutters">
-              <div class="col-md-4">
-                <img src="../static/{{book_card.book_image_filename | urlencode}}" class="card-img" alt="image">
-              </div>
-              <div class="col">
-                <div class="card-body">
-                  <h5 class="card-title">{{book_card.book_name}}</h5>
-                  <p class="card-text">{{book_card.author}}</p>
-                    {% for genre in book_card.genres %}
-                      <h6><span class="badge badge-light">{{genre}}</span></h6>
-                    {% endfor %}
-                  <a href="../{{book_card.book_path | urlencode}}" target="_blank">Читать</a>
+    <div class="container">
+      <div class="row row-cols-2">
+        {% for book_card in book_cards %}
+          <div class="col">
+            <div class="card mb-3" style="max-width: 540px;">
+              <div class="row no-gutters">
+                <div class="col-md-4">
+                  <img src="../static/{{book_card.book_image_filename | urlencode}}" class="card-img" alt="image">
+                </div>
+                <div class="col">
+                  <div class="card-body">
+                    <h5 class="card-title">{{book_card.book_name}}</h5>
+                    <p class="card-text">{{book_card.author}}</p>
+                      {% for genre in book_card.genres %}
+                        <h6><span class="badge badge-light">{{genre}}</span></h6>
+                      {% endfor %}
+                    <a href="../{{book_card.book_path | urlencode}}" target="_blank">Читать</a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+      </div>
     </div>
-  </div>
 
 
 
